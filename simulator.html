@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FuelSim - 3D Gas Station Pump Simulator</title>
+    <link type="image/png" sizes="32x32" rel="icon" href="logo.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
+    <link rel="stylesheet" href="https://unpkg.com/lenis@1.3.8/dist/lenis.css">
+    <script src="https://unpkg.com/lenis@1.3.8/dist/lenis.min.js"></script>
+    <style>
+        html {
+            scroll-padding-top: 75px; /* navbar height is */
+        }
+    </style>
+</head>
+<body class="bg-[#d3dbd4] min-h-screen flex flex-col">
+    
+    <!-- Navbar -->
+    <nav class="bg-[#10130f]/90 px-3 sm:px-4 md:px-6 py-3 md:py-4 flex items-center justify-between shadow-2xl border-b-4 border-green-700 sticky top-0 z-50 backdrop-blur-md glass">
+        <div class="flex items-center space-x-2 sm:space-x-3">
+            <img src="logo.png" alt="FuelSim Logo" class="h-7 sm:h-8 md:h-9 w-auto" />
+            <span class="text-lg sm:text-xl md:text-2xl font-bold text-white">FuelSim</span>
+        </div>
+        <div class="hidden md:flex items-center space-x-6 lg:space-x-8">
+            <a href="#" onclick="document.getElementById('mainSim').scrollIntoView({behavior: 'smooth'});return false;" class="text-white hover:text-green-300 transition text-sm lg:text-base">Home</a>
+            <a href="#about" onclick="document.getElementById('about').scrollIntoView({behavior: 'smooth'});return false;" class="text-white hover:text-green-300 transition text-sm lg:text-base">About</a>
+            <a href="#contact" onclick="document.getElementById('contact').scrollIntoView({behavior: 'smooth'});return false;" class="text-white hover:text-green-300 transition text-sm lg:text-base">Contact</a>
+            <button id="quickGuideBtn" class="w-8 h-8 lg:w-9 lg:h-9 rounded-full bg-[#232820] flex items-center justify-center glass group relative">
+                <i class="fas fa-question text-white text-sm lg:text-lg"></i>
+                <span class="absolute bottom-[-2.2rem] left-1/2 -translate-x-1/2 bg-black bg-opacity-80 text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition pointer-events-none whitespace-nowrap z-50">Quick Guide</span>
+            </button>            
+        </div>
+        <!-- Mobile menu button -->
+        <div class="md:hidden flex items-center space-x-2">
+            <button id="quickGuideBtnMobile" class="w-8 h-8 rounded-full bg-[#232820] flex items-center justify-center glass">
+                <i class="fas fa-question text-white text-sm"></i>
+            </button>
+            <button id="mobileMenuBtn" class="w-8 h-8 rounded-full bg-[#232820] flex items-center justify-center glass">
+                <i class="fas fa-bars text-white text-sm"></i>
+            </button>
+        </div>
+    </nav>
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="hidden md:hidden bg-[#10130f]/95 backdrop-blur-md border-b-2 border-green-700">
+        <div class="px-4 py-3 space-y-3">
+            <a href="#" onclick="document.getElementById('mainSim').scrollIntoView({behavior: 'smooth'});closeMobileMenu();" class="block text-white hover:text-green-300 transition py-2">Home</a>
+            <a href="#about" onclick="document.getElementById('about').scrollIntoView({behavior: 'smooth'});closeMobileMenu();" class="block text-white hover:text-green-300 transition py-2">About</a>
+            <a href="#contact" onclick="document.getElementById('contact').scrollIntoView({behavior: 'smooth'});closeMobileMenu();" class="block text-white hover:text-green-300 transition py-2">Contact</a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main id="mainSim" class="flex-1 flex flex-col items-center justify-center px-2 sm:px-4 py-4 sm:py-6 md:py-8 bg-[#10130f] rounded-2xl sm:rounded-3xl mx-2 sm:mx-4 mt-4 sm:mt-6 md:mt-8 mb-2 sm:mb-4 glass">
+        <h1 class="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-6 sm:mb-8 md:mb-10 text-center px-2">Gas Station Pump Simulator</h1>
+        <form id="pumpForm" class="w-full max-w-xs sm:max-w-sm md:max-w-md space-y-4 sm:space-y-6">
+            <div>
+                <label class="block text-white mb-2 font-medium text-sm sm:text-base">Fuel Type</label>
+                <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 md:space-x-4" id="fuelBtnGroup">
+                    <button type="button" class="fuel-btn-option active flex-1 py-2 px-3 sm:px-4 text-sm sm:text-base" id="petrolBtn">Petrol</button>
+                    <button type="button" class="fuel-btn-option flex-1 py-2 px-3 sm:px-4 text-sm sm:text-base" id="dieselBtn">Diesel</button>
+                    <button type="button" class="fuel-btn-option flex-1 py-2 px-3 sm:px-4 text-sm sm:text-base" id="xfuelBtn">Xfuel</button>
+                </div>
+            </div>
+            <div>
+                <label class="block text-white mb-2 font-medium text-sm sm:text-base">Calculation Mode</label>
+                <select id="calcModeSelect" class="w-full bg-[#181c18] text-white rounded-lg p-3 sm:p-4 focus:outline-none focus:ring-2 focus:ring-green-400 text-sm sm:text-base">
+                    <option value="liters">Liters</option>
+                    <option value="price">Price</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-white mb-2 font-medium text-sm sm:text-base">Desired Amount</label>
+                <input id="amountInput" type="number" min="0" step="any" placeholder="Enter amount" class="w-full bg-[#181c18] text-white rounded-lg p-3 sm:p-4 focus:outline-none focus:ring-2 focus:ring-green-400 text-sm sm:text-base" />
+            </div>
+            <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 md:space-x-4 justify-center">
+                <button id="startBtn" type="button" class="font-semibold px-6 sm:px-8 py-2 sm:py-3 rounded-full transition text-sm sm:text-base">Start</button>
+                <button id="stopBtn" type="button" class="font-semibold px-6 sm:px-8 py-2 sm:py-3 rounded-full transition text-sm sm:text-base" disabled>Stop</button>
+            </div>
+            <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 md:space-x-4 justify-center mt-4 sm:mt-6 md:mt-8">
+                <button id="resetBtn" type="button" class="px-4 sm:px-6 py-2 text-sm sm:text-base">Reset</button>
+                <button id="printBillBtn" type="button" class="px-4 sm:px-6 py-2 text-sm sm:text-base" disabled>Print Bill</button>
+            </div>
+        </form>
+
+        <!-- Summary Cards -->
+        <div class="w-full max-w-6xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-6 sm:mt-8 md:mt-12">
+            <div class="bg-[#181c18] rounded-xl p-4 sm:p-5 md:p-6 border border-green-900 text-white flex flex-col items-center glass">
+                <span class="text-xs sm:text-sm text-green-300 mb-1 sm:mb-2">Selected Fuel</span>
+                <span id="summaryFuel" class="text-lg sm:text-xl md:text-2xl font-bold">Petrol</span>
+            </div>
+            <div class="bg-[#181c18] rounded-xl p-4 sm:p-5 md:p-6 border border-green-900 text-white flex flex-col items-center glass">
+                <span class="text-xs sm:text-sm text-green-300 mb-1 sm:mb-2">Quantity Dispensed</span>
+                <span id="summaryQuantity" class="text-lg sm:text-xl md:text-2xl font-bold">0.00 L</span>
+            </div>
+            <div class="bg-[#181c18] rounded-xl p-4 sm:p-5 md:p-6 border border-green-900 text-white flex flex-col items-center glass">
+                <span class="text-xs sm:text-sm text-green-300 mb-1 sm:mb-2">Price Per Unit</span>
+                <span id="summaryPrice" class="text-lg sm:text-xl md:text-2xl font-bold">₹106.20</span>
+            </div>
+            <div class="bg-[#181c18] rounded-xl p-4 sm:p-5 md:p-6 border border-green-900 text-white flex flex-col items-center glass">
+                <span class="text-xs sm:text-sm text-green-300 mb-1 sm:mb-2">Total Cost</span>
+                <span id="summaryTotal" class="text-lg sm:text-xl md:text-2xl font-bold">₹0.00</span>
+            </div>
+        </div>
+    </main>
+
+    <!-- About Section -->
+    <section id="about" class="max-w-3xl mx-auto my-12 p-8 rounded-3xl bg-gradient-to-br from-[#232820] via-[#181c18] to-[#232820] shadow-2xl border-4 border-[#232820] glass">
+        <h2 class="text-2xl md:text-3xl font-bold text-green-300 mb-4">About FuelSim</h2>
+        <p class="text-white text-lg mb-2">FuelSim is a modern, interactive gas station pump simulator. It features real-time price updates, animated 3D UI, sound effects, and a digital display font for a true fuel station experience. Switch between Petrol, Diesel, and Xfuel to see the theme and pricing change instantly. Built for fun, learning, and demonstration purposes!</p>
+        <ul class="list-disc text-green-200 ml-8 mt-2">
+            <li>Real-time price simulation</li>
+            <li>3D animated UI and digital font</li>
+            <li>Sound effects and interactive controls</li>
+            <li>Multiple fuel types and dynamic theming</li>
+        </ul>
+    </section>
+
+    <!-- Contact & Donate Section -->
+    <section id="contact" class="max-w-3xl mx-auto my-12 p-8 rounded-3xl bg-gradient-to-br from-[#232820] via-[#181c18] to-[#232820] shadow-2xl border-4 border-[#232820] glass">
+        <h2 class="text-2xl md:text-3xl font-bold text-green-300 mb-4">Contact & Donate</h2>
+        <p class="text-white text-lg mb-6">Have feedback, want to contribute, or just want to support FuelSim? Reach out or donate below!</p>
+        <div class="mb-6">
+            <h3 class="text-xl text-green-200 mb-2">Donate Us</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-[#181c18] rounded-xl p-4 flex flex-col items-center border border-green-900 glass">
+                    <i class="fa-brands fa-ethereum text-3xl text-blue-400 mb-2"></i>
+                    <span class="text-green-200 mb-1">Ethereum</span>
+                    <span class="text-white text-xs select-all" id="ethWallet">0xb797e1a085E39f15841083E6FBB0b4750ff1A173</span>
+                    <button onclick="navigator.clipboard.writeText(document.getElementById('ethWallet').textContent)" class="mt-2 px-3 py-1 rounded bg-blue-500 text-white text-xs hover:bg-blue-600">Copy</button>
+                </div>
+                <div class="bg-[#181c18] rounded-xl p-4 flex flex-col items-center border border-green-900 glass">
+                    <i class="fa-brands fa-bitcoin text-3xl text-yellow-400 mb-2"></i>
+                    <span class="text-green-200 mb-1">Bitcoin</span>
+                    <span class="text-white text-xs select-all" id="btcWallet">1JcifknwxVZDbQafrqBVyVN32FBXhdPCHS</span>
+                    <button onclick="navigator.clipboard.writeText(document.getElementById('btcWallet').textContent)" class="mt-2 px-3 py-1 rounded bg-yellow-500 text-white text-xs hover:bg-yellow-600">Copy</button>
+                </div>
+                <div class="bg-[#181c18] rounded-xl p-4 flex flex-col items-center border border-green-900 glass">
+                    <i class="fa-solid fa-coins text-3xl text-pink-400 mb-2"></i>
+                    <span class="text-green-200 mb-1">USDT (TRC20)</span>
+                    <span class="text-white text-xs select-all" id="usdtWallet">0xb797e1a085E39f15841083E6FBB0b4750ff1A173</span>
+                    <button onclick="navigator.clipboard.writeText(document.getElementById('usdtWallet').textContent)" class="mt-2 px-3 py-1 rounded bg-pink-500 text-white text-xs hover:bg-pink-600">Copy</button>
+                </div>
+            </div>
+        </div>
+        <div class="mt-8">
+            <h3 class="text-xl text-green-200 mb-2">Contact</h3>
+            <p class="text-white">Email: <a href="mailto:harshadnikam7516@gmail.com" class="text-green-300 underline">help.fuelsim.com</a></p>
+        </div>
+    </section>
+
+    <!-- Minimalistic Floating Feedback Button -->
+    <div id="floatingFeedbackBtn" style="position:fixed;bottom:32px;right:32px;z-index:1000;">
+      <button id="feedbackToggleBtn" aria-label="Feedback & Bug Report" class="bg-gradient-to-br from-green-500 via-blue-500 to-pink-500 text-white shadow-xl rounded-full w-16 h-16 flex items-center justify-center text-2xl transition-transform duration-300 hover:scale-110 focus:outline-none">
+        <i class="fas fa-comment-dots"></i>
+      </button>
+      <div id="feedbackPanel" class="hidden mt-4 bg-[#181c18] border border-green-700 rounded-2xl shadow-2xl p-6 w-80 transition-all duration-500 glass" style="position:absolute;right:0;bottom:80px;">
+        <div class="flex justify-between items-center mb-2">
+          <span class="text-green-300 font-bold text-lg"><i class="fas fa-comment-dots mr-2"></i>Feedback</span>
+          <button id="closeFeedbackPanel" class="text-gray-400 hover:text-red-400 text-xl focus:outline-none"><i class="fas fa-times"></i></button>
+        </div>
+        <form id="miniFeedbackForm" class="space-y-3">
+          <textarea id="miniFeedbackMsg" rows="3" class="w-full bg-[#232820] text-white rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-green-400 border border-green-800 resize-none" placeholder="Share your feedback or report a bug..."></textarea>
+          <div class="flex space-x-2">
+            <button type="submit" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-lg transition">Send</button>
+            <button type="button" id="cancelMiniFeedback" class="flex-1 bg-gray-700 hover:bg-gray-800 text-white font-semibold py-2 rounded-lg transition">Cancel</button>
+          </div>
+        </form>
+        <div id="miniFeedbackStatus" class="hidden mt-2 text-center text-green-400 font-semibold"></div>
+      </div>
+    </div>
+    <!-- END Minimalistic Floating Feedback Button -->
+
+    <!-- Feedback & Bug Reporting System -->
+    <section id="feedback" class="max-w-4xl mx-auto my-12 p-8 rounded-3xl bg-gradient-to-br from-[#232820] via-[#181c18] to-[#232820] shadow-2xl border-4 border-[#232820] hidden glass">
+        <h2 class="text-2xl md:text-3xl font-bold text-green-300 mb-6 text-center">Feedback & Bug Reports</h2>
+        
+    </section>
+
+    <audio id="clickSound" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3"></audio>
+    <audio id="pumpSound" src="https://assets.mixkit.co/active_storage/sfx/2570/2570-preview.mp3" loop></audio>
+    <audio id="completeSound" src="https://assets.mixkit.co/active_storage/sfx/2572/2572-preview.mp3"></audio>
+    <script src="script.js"></script>
+
+    <!-- Footer -->
+    <footer class="w-full bg-[#181c18] border-t-2 border-[#23243a] py-6 mt-8">
+        <div class="max-w-5xl mx-auto flex flex-col items-center justify-center px-4 gap-2">
+            <div class="flex space-x-5 text-2xl mb-2">
+                <a href="https://github.com/dev-harshhh19" target="_blank" rel="noopener" class="text-white hover:text-green-300 transition"><i class="fab fa-github"></i></a>
+                <a href="https://in.linkedin.com/in/harshad-nikam-311734281" target="_blank" rel="noopener" class="text-white hover:text-blue-400 transition"><i class="fab fa-linkedin"></i></a>
+                <a href="https://instagram.com/dev.harshhh19/"target="_blank" rel="noopener" class="text-white hover:text-pink-400 transition"><i class="fab fa-instagram"></i></a>
+                <a href="https://twitter.com/not_harshad_19/" target="_blank" rel="noopener" class="text-white hover:text-blue-400 transition"><i class="fab fa-x-twitter"></i></a>
+            </div>
+            <div class="text-green-400 text-lg font-bold mb-1">
+                &copy; 2025 FuelSim - Gas Station Pump Simulator
+            </div>
+            <div class="text-green-300 mb-1">
+                Created with <span class="text-pink-500">❤️</span> by Harshad Nikam
+            </div>
+            <div class="mb-1">
+                <a href="privacy.html" class="text-green-300 hover:underline">Privacy Policy</a>
+                <span class="mx-2 text-green-700">|</span>
+                <a href="terms.html" class="text-green-300 hover:underline">Terms of Service</a>
+                <span class="mx-2 text-green-700"></span>
+            </div>
+            <div class="text-green-400 text-xs mt-1">
+                All rights reserved. This is a demonstration project for educational purposes.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Print Bill Modal -->
+    <div id="printBillModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm hidden p-4">
+      <div class="glass p-4 sm:p-6 md:p-8 rounded-2xl max-w-sm sm:max-w-md md:max-w-lg w-full relative shadow-2xl border border-green-700 max-h-[90vh] overflow-y-auto">
+        <button id="closePrintBill" class="absolute top-3 right-3 sm:top-4 sm:right-4 text-gray-400 hover:text-red-400 text-lg sm:text-xl focus:outline-none transition-colors duration-200 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-full hover:bg-red-500 hover:bg-opacity-20">
+          <i class="fas fa-times"></i>
+        </button>
+        <h2 class="text-lg sm:text-xl md:text-2xl font-bold text-green-300 mb-3 sm:mb-4 flex items-center pr-8">
+          <i class="fas fa-receipt mr-2 text-base sm:text-lg md:text-xl"></i>
+          <span class="truncate">Fuel Receipt</span>
+        </h2>
+        <div id="billDetails" class="text-white mb-4 sm:mb-6 text-sm sm:text-base"></div>
+        <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 justify-center">
+          <button id="printReceiptBtn" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 sm:px-6 rounded-lg transition flex items-center justify-center text-sm sm:text-base">
+            <i class="fas fa-print mr-2"></i>Print Receipt
+          </button>
+          <button id="closeReceiptBtn" class="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 sm:px-6 rounded-lg transition text-sm sm:text-base">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Guide Modal -->
+    <div id="quickGuideModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm hidden">
+      <div class="glass p-8 rounded-2xl max-w-lg w-full relative shadow-2xl border border-green-700">
+        <button id="closeQuickGuide" class="absolute top-3 right-3 text-gray-400 hover:text-red-400 text-2xl focus:outline-none"><i class="fas fa-times"></i></button>
+        <h2 class="text-2xl font-bold text-green-300 mb-4 flex items-center"><i class="fas fa-question-circle mr-2"></i>Quick Guide</h2>
+        <ul class="list-disc pl-6 text-white space-y-2 mb-2">
+          <li>Choose your fuel type: <b>Petrol, Diesel, or Xfuel</b>.</li>
+          <li>Select calculation mode: <b>Liters</b> or <b>Price</b>.</li>
+          <li>Enter your desired amount and click <b>Start</b>.</li>
+          <li>Use the <b>Stop</b> button to pause dispensing.</li>
+          <li>Try the <b>Feedback</b> button (bottom right) to send suggestions or report bugs.</li>
+          <li>Switch themes by changing fuel type for a new look!</li>
+        </ul>
+        <div class="text-green-200 text-sm mt-4">Enjoy simulating your fuel station experience!</div>
+      </div>
+    </div>
+</body>
+</html> 
