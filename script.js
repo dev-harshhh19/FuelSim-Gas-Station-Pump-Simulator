@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const startBtn = document.getElementById('startBtn');
     const stopBtn = document.getElementById('stopBtn');
     const resetBtn = document.getElementById('resetBtn');
+    const printBillBtn = document.getElementById('printBillBtn');
     const summaryFuel = document.getElementById('summaryFuel');
     const summaryQuantity = document.getElementById('summaryQuantity');
     const summaryPrice = document.getElementById('summaryPrice');
@@ -121,6 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
         isPumping = false;
         startBtn.disabled = false;
         stopBtn.disabled = true;
+        printBillBtn.disabled = true;
         amountInput.disabled = false;
         amountInput.value = '';
         pumpSound.pause();
@@ -148,8 +150,53 @@ document.addEventListener('DOMContentLoaded', () => {
             pumpSound.pause();
             completeSound.play();
             clearInterval(updateInterval);
+
+            // Enable Print Bill button when transaction is complete
+            printBillBtn.disabled = false;
         }
     }
+
+    // Print Bill Logic
+    function handlePrintBill() {
+        const billDetails = `
+            <div class="space-y-4">
+                <div class="text-center border-b border-green-700 pb-4 mb-4">
+                    <h3 class="text-lg font-bold text-green-300">FuelSim Gas Station</h3>
+                    <p class="text-sm text-gray-300">Fuel Receipt</p>
+                    <p class="text-xs text-gray-400">${new Date().toLocaleString()}</p>
+                </div>
+                <div class="space-y-2">
+                    <div class="flex justify-between">
+                        <span class="text-green-200">Fuel Type:</span>
+                        <span class="font-semibold">${summaryFuel.textContent}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-green-200">Quantity:</span>
+                        <span class="font-semibold">${summaryQuantity.textContent}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-green-200">Price per Unit:</span>
+                        <span class="font-semibold">${summaryPrice.textContent}</span>
+                    </div>
+                    <div class="border-t border-green-700 pt-2 mt-2">
+                        <div class="flex justify-between text-lg">
+                            <span class="text-green-300 font-bold">Total Cost:</span>
+                            <span class="font-bold text-green-400">${summaryTotal.textContent}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center text-xs text-gray-400 mt-4 border-t border-green-700 pt-2">
+                    <p>Thank you for using FuelSim!</p>
+                    <p>This is a simulated receipt.</p>
+                </div>
+            </div>
+        `;
+        
+        document.getElementById('billDetails').innerHTML = billDetails;
+        printBillModal.classList.remove('hidden');
+    }
+
+    printBillBtn.addEventListener('click', handlePrintBill);
 
     // --- Price Update Simulation ---
     function updateFuelPrices() {
@@ -371,13 +418,64 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // --- Print Bill Modal Logic ---
+    const printBillModal = document.getElementById('printBillModal');
+    const closePrintBill = document.getElementById('closePrintBill');
+    const printReceiptBtn = document.getElementById('printReceiptBtn');
+    const closeReceiptBtn = document.getElementById('closeReceiptBtn');
+
+    if (printReceiptBtn) {
+        printReceiptBtn.addEventListener('click', () => {
+            window.print(); // This will print the current page as it is rendered.
+        });
+    }
+    if (closeReceiptBtn) {
+        closeReceiptBtn.addEventListener('click', () => {
+            printBillModal.classList.add('hidden');
+        });
+    }
+
+    if (closePrintBill && printBillModal) {
+        closePrintBill.addEventListener('click', () => {
+            printBillModal.classList.add('hidden');
+        });
+    }
+    // Close modal on background click
+    if (printBillModal) {
+        printBillModal.addEventListener('click', (e) => {
+            if (e.target === printBillModal) {
+                printBillModal.classList.add('hidden');
+            }
+        });
+    }
+
     // --- Quick Guide Modal Logic ---
     const quickGuideBtn = document.getElementById('quickGuideBtn');
+    const quickGuideBtnMobile = document.getElementById('quickGuideBtnMobile');
     const quickGuideModal = document.getElementById('quickGuideModal');
     const closeQuickGuide = document.getElementById('closeQuickGuide');
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+
+    if (mobileMenuBtn && mobileMenu) {
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+    }
+
+    window.closeMobileMenu = function() {
+        if (mobileMenu && !mobileMenu.classList.contains('hidden')) {
+            mobileMenu.classList.add('hidden');
+        }
+    }
 
     if (quickGuideBtn && quickGuideModal) {
         quickGuideBtn.addEventListener('click', () => {
+            quickGuideModal.classList.remove('hidden');
+        });
+    }
+    if (quickGuideBtnMobile && quickGuideModal) {
+        quickGuideBtnMobile.addEventListener('click', () => {
             quickGuideModal.classList.remove('hidden');
         });
     }
@@ -396,8 +494,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     // Close modal on Escape key
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && quickGuideModal && !quickGuideModal.classList.contains('hidden')) {
-            quickGuideModal.classList.add('hidden');
+        if (e.key === 'Escape') {
+            if (printBillModal && !printBillModal.classList.contains('hidden')) {
+                printBillModal.classList.add('hidden');
+            } else if (quickGuideModal && !quickGuideModal.classList.contains('hidden')) {
+                quickGuideModal.classList.add('hidden');
+            }
         }
     });
     const lenis = new Lenis();
