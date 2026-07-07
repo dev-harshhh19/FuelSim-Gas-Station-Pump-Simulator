@@ -1,528 +1,325 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FuelSim - Gas Station Pump Simulator</title>
-    <link type="image/png" sizes="32x32" rel="icon" href="logo.png">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-<style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>FuelSim - Professional Gas Station Simulator</title>
 
-        body {
-            font-family: 'Orbitron', sans-serif;
-            background: linear-gradient(135deg, #23243a 0%, #141726 100%);
-            background-size: 150% 150%;
-            animation: animatedGradient 32s ease-in-out infinite;
-            overflow: hidden;
-            position: relative;
-        }
+        <!-- Favicon -->
+        <link type="image/png" sizes="32x32" rel="icon" href="logo.png" />
 
-        /* ========== Neural Network Background ========== */
-        #neural-network {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100vh;
-            z-index: -2;
-            opacity: 0.4;
-        }
+        <!-- Fonts -->
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
+            rel="stylesheet"
+        />
 
-        @keyframes animatedGradient {
-            0% { background-position: 10% 50%; }
-            50% { background-position: 90% 50%; }
-            100% { background-position: 10% 50%; }
-        }
+        <!-- Icons -->
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+        />
 
-        #canvas-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100vh;
-            z-index: -1;
-        }
-
-        .overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            z-index: 10;
-            background: rgba(0, 0, 0, 0.3);
-        }
-
-        .hero-content {
-            max-width: 800px;
-            padding: 2rem;
-            animation: slideUp 1s ease-out;
-        }
-
-        .logo {
-            font-size: 6rem;
-            font-weight: 900;
-            color: #22c55e;
-            margin-bottom: 1rem;
-            font-family: 'Inter', sans-serif;
-        }
-
-        .tagline {
-            font-size: 1.8rem;
-            color: #e5e7eb;
-            margin-bottom: 2rem;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-            font-weight: 400;
-            font-family: 'Inter', sans-serif;
-        }
-
-        .features {
-            display: flex;
-            justify-content: center;
-            gap: 3rem;
-            margin-bottom: 3rem;
-            flex-wrap: wrap;
-        }
-
-        .feature {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: #22c55e;
-            font-size: 1.1rem;
-            font-weight: 500;
-            background: rgba(16, 19, 15, 0.8);
-            padding: 1.5rem;
-            border-radius: 1rem;
-            border: 1px solid rgba(34, 197, 94, 0.2);
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
-        }
-
-        .feature:hover {
-            transform: translateY(-5px);
-            border-color: rgba(34, 197, 94, 0.4);
-            box-shadow: 0 10px 30px rgba(34, 197, 94, 0.1);
-        }
-
-        .feature i {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-            color: #22c55e;
-        }
-
-        .cta-button {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 1.2rem 3rem;
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: #ffffff;
-            background: linear-gradient(135deg, #22c55e, #16a34a);
-            border: none;
-            border-radius: 50px;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            box-shadow: 
-                0 10px 30px rgba(34, 197, 94, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.2);
-            transform: perspective(1000px) translateZ(0);
-            cursor: pointer;
-            font-family: 'Inter', sans-serif;
-        }
-
-        .cta-button:hover {
-            transform: perspective(1000px) translateZ(20px) translateY(-5px);
-            box-shadow: 
-                0 20px 50px rgba(34, 197, 94, 0.4),
-                inset 0 1px 0 rgba(255, 255, 255, 0.3);
-            background: linear-gradient(135deg, #16a34a, #22c55e);
-        }
-
-        .particles {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(50px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes glow {
-            from {
-                text-shadow: 
-                    0 0 10px #00ff41,
-                    0 0 20px #00ff41,
-                    0 0 40px #00ff41;
-            }
-            to {
-                text-shadow: 
-                    0 0 5px #00ff41,
-                    0 0 15px #00ff41,
-                    0 0 30px #00ff41,
-                    0 0 60px #00ff41;
-            }
-        }
-
-        /* ========== Loading Screen ========== */
-        #loading-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100vh;
-            background: linear-gradient(135deg, #23243a 0%, #141726 100%);
-            background-size: 150% 150%;
-            animation: animatedGradient 32s ease-in-out infinite;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            transition: opacity 0.8s ease, visibility 0.8s ease;
-        }
-
-        #loading-screen.hidden {
-            opacity: 0;
-            visibility: hidden;
-        }
-
-        .loading-logo {
-            font-size: 4rem;
-            font-weight: 900;
-            color: #22c55e;
-            font-family: 'Inter', sans-serif;
-            margin-bottom: 2rem;
-            text-shadow: 
-                0 0 20px rgba(34, 197, 94, 0.5),
-                0 0 40px rgba(34, 197, 94, 0.3);
-            animation: logoGlow 2s ease-in-out infinite alternate;
-        }
-
-        @keyframes logoGlow {
-            from {
-                text-shadow: 
-                    0 0 20px rgba(34, 197, 94, 0.5),
-                    0 0 40px rgba(34, 197, 94, 0.3);
-            }
-            to {
-                text-shadow: 
-                    0 0 30px rgba(34, 197, 94, 0.8),
-                    0 0 60px rgba(34, 197, 94, 0.5),
-                    0 0 80px rgba(34, 197, 94, 0.3);
-            }
-        }
-
-        .loading-spinner {
-            width: 60px;
-            height: 60px;
-            border: 3px solid rgba(34, 197, 94, 0.3);
-            border-top: 3px solid #22c55e;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 1rem;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .loading-text {
-            color: #e5e7eb;
-            font-size: 1.2rem;
-            font-family: 'Inter', sans-serif;
-            animation: pulse 2s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 0.7; }
-            50% { opacity: 1; }
-        }
-
-        .fuel-pump-icon {
-            font-size: 3rem;
-            color: #22c55e;
-            margin-bottom: 1rem;
-            animation: pumpFloat 3s ease-in-out infinite;
-        }
-
-        @keyframes pumpFloat {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-        }
-
-        @media (max-width: 768px) {
-            .logo {
-                font-size: 4rem;
-            }
-            .tagline {
-                font-size: 1.4rem;
-            }
-            .features {
-                gap: 2rem;
-            }
-            .cta-button {
-                padding: 1rem 2rem;
-                font-size: 1.2rem;
-            }
-            .loading-logo {
-                font-size: 3rem;
-            }
-        }
-    </style>
-</head>
-<body>
-    <!-- Loading Screen -->
-    <div id="loading-screen">
-        <div class="fuel-pump-icon">
-            <i class="fas fa-gas-pump"></i>
-        </div>
-        <div class="loading-logo">FuelSim</div>
-        <div class="loading-spinner"></div>
-        <div class="loading-text">Loading your gas station experience...</div>
-    </div>
-
-
-    <!-- 3D Canvas Background -->
-    <div id="canvas-container"></div>
-    
-    <!-- Content Overlay -->
-    <div class="overlay">
-        <div class="hero-content">
-            <h1 class="logo">FuelSim</h1>
-            <p class="tagline">Experience the Future of Gas Station Simulation</p>
-            
-            <div class="features">
-                <div class="feature">
-                    <i class="fas fa-cube"></i>
-                    <span>3D Graphics</span>
-                </div>
-                <div class="feature">
-                    <i class="fas fa-gas-pump"></i>
-                    <span>Real Simulation</span>
-                </div>
-                <div class="feature">
-                    <i class="fas fa-magic"></i>
-                    <span>Interactive UI</span>
+        <!-- Custom Styles -->
+        <link rel="stylesheet" href="styles.css" />
+    </head>
+    <body data-fuel="petrol">
+        <!-- Header -->
+        <header class="header">
+            <div class="container header-content">
+                <a href="#" class="logo-container">
+                    <i class="fa-solid fa-gas-pump logo-icon"></i>
+                    <span>FuelSim</span>
+                </a>
+                <div style="font-size: 0.875rem; color: var(--text-secondary)">
+                    Professional Simulator
                 </div>
             </div>
-            
-            <button class="cta-button" onclick="window.location.href='./simulator.html'">
-                <i class="fas fa-rocket"></i> Launch Simulator
-            </button>
+        </header>
+
+        <!-- Main Application Area -->
+        <main class="main-content">
+            <div class="container">
+                <div class="dashboard">
+                    <!-- Left Panel: Controls -->
+                    <section class="panel controls-panel">
+                        <h2 class="panel-title">Pump Controls</h2>
+
+                        <form id="pumpForm">
+                            <!-- Fuel Type Selection -->
+                            <div class="form-group">
+                                <label class="form-label">Fuel Type</label>
+                                <div class="fuel-selector" id="fuelSelector">
+                                    <button
+                                        type="button"
+                                        class="fuel-btn active"
+                                        data-type="petrol"
+                                    >
+                                        Petrol
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="fuel-btn"
+                                        data-type="diesel"
+                                    >
+                                        Diesel
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="fuel-btn"
+                                        data-type="xfuel"
+                                    >
+                                        Xfuel
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Calculation Mode -->
+                            <div class="form-group">
+                                <label class="form-label" for="calcMode"
+                                    >Calculation Mode</label
+                                >
+                                <select id="calcMode" class="form-control">
+                                    <option value="liters">
+                                        Target Liters (Volume)
+                                    </option>
+                                    <option value="price">
+                                        Target Price (Currency)
+                                    </option>
+                                </select>
+                            </div>
+
+                            <!-- Desired Amount -->
+                            <div class="form-group">
+                                <label class="form-label" for="amountInput"
+                                    >Desired Amount</label
+                                >
+                                <input
+                                    id="amountInput"
+                                    type="number"
+                                    min="0.01"
+                                    step="0.01"
+                                    class="form-control"
+                                    placeholder="Enter target volume (L)"
+                                    required
+                                />
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="btn-group">
+                                <button
+                                    type="button"
+                                    id="startBtn"
+                                    class="btn btn-primary"
+                                >
+                                    <i class="fa-solid fa-play"></i> Start
+                                </button>
+                                <button
+                                    type="button"
+                                    id="stopBtn"
+                                    class="btn btn-danger"
+                                    disabled
+                                >
+                                    <i class="fa-solid fa-stop"></i> Stop
+                                </button>
+                            </div>
+
+                            <div
+                                class="btn-group"
+                                style="margin-top: var(--spacing-3)"
+                            >
+                                <button
+                                    type="button"
+                                    id="resetBtn"
+                                    class="btn btn-secondary"
+                                >
+                                    <i class="fa-solid fa-rotate-left"></i>
+                                    Reset
+                                </button>
+                                <button
+                                    type="button"
+                                    id="printBtn"
+                                    class="btn btn-secondary"
+                                    disabled
+                                >
+                                    <i class="fa-solid fa-receipt"></i> Print
+                                    Receipt
+                                </button>
+                            </div>
+                        </form>
+                    </section>
+
+                    <!-- Right Panel: Displays -->
+                    <section class="panel displays-panel">
+                        <h2 class="panel-title">Current Transaction</h2>
+
+                        <div class="displays-grid">
+                            <div class="display-card">
+                                <div class="display-label">Selected Fuel</div>
+                                <div class="display-value" id="displayFuel">
+                                    Petrol
+                                </div>
+                            </div>
+
+                            <div class="display-card">
+                                <div class="display-label">
+                                    Price per Liter
+                                    <span
+                                        style="
+                                            color: #00ff66;
+                                            font-size: 0.65rem;
+                                            margin-left: 8px;
+                                            font-weight: 600;
+                                            text-transform: uppercase;
+                                            letter-spacing: 1px;
+                                        "
+                                        ><i
+                                            class="fa-solid fa-circle"
+                                            style="
+                                                font-size: 0.4rem;
+                                                vertical-align: middle;
+                                                margin-right: 4px;
+                                            "
+                                        ></i
+                                        >Live</span
+                                    >
+                                </div>
+                                <div class="display-value" id="displayPrice">
+                                    ₹0.00
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="displays-grid">
+                            <div class="display-card">
+                                <div class="display-label">
+                                    Dispensed Volume
+                                </div>
+                                <div class="display-value" id="displayVolume">
+                                    0.00 L
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Total Cost (Emphasized) -->
+                        <div
+                            class="display-card total-card"
+                            style="margin-top: var(--spacing-6)"
+                        >
+                            <div class="display-label" style="color: inherit">
+                                Total Amount Due
+                            </div>
+                            <div class="display-value" id="displayTotal">
+                                ₹0.00
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer & Support -->
+        <footer class="footer">
+            <div class="container footer-content text-center">
+                <div class="footer-links">
+                    <a
+                        href="https://buymeacoffee.com/dev.harshhh"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="minimal-link"
+                        title="Buy me a coffee"
+                    >
+                        <i
+                            class="fa-solid fa-mug-hot"
+                            style="color: #ffdd00"
+                        ></i>
+                        Buy me a coffee
+                    </a>
+                    <a
+                        href="https://github.com/sponsors/dev-harshhh19"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="minimal-link"
+                        title="GitHub Sponsors"
+                    >
+                        <i class="fa-brands fa-github"></i> Sponsor
+                    </a>
+                    <span
+                        class="minimal-link crypto-link"
+                        id="copyCryptoBtn"
+                        title="Copy USDT Address"
+                    >
+                        <i
+                            class="fa-brands fa-ethereum"
+                            style="color: #00ff66"
+                        ></i>
+                        USDT <span>(0xCd47...)</span>
+                    </span>
+                </div>
+                <p class="footer-text">FuelSim &copy; 2024-26 Harshad Nikam.</p>
+            </div>
+        </footer>
+
+        <!-- Receipt Modal -->
+        <div id="receiptModal" class="modal-overlay">
+            <div class="modal">
+                <div class="modal-header">
+                    <h3 class="modal-title">Transaction Receipt</h3>
+                    <button class="modal-close" id="closeReceiptBtn">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="receipt">
+                        <div class="receipt-header">
+                            <strong>FUELSIM STATION</strong><br />
+                            <span
+                                style="
+                                    font-size: 0.75rem;
+                                    color: var(--text-muted);
+                                "
+                                id="receiptDate"
+                            ></span>
+                        </div>
+                        <div class="receipt-row">
+                            <span>Fuel Type:</span>
+                            <strong id="receiptFuel">Petrol</strong>
+                        </div>
+                        <div class="receipt-row">
+                            <span>Unit Price:</span>
+                            <strong id="receiptUnitPrice">₹0.00/L</strong>
+                        </div>
+                        <div class="receipt-row">
+                            <span>Volume:</span>
+                            <strong id="receiptVolume">0.00 L</strong>
+                        </div>
+                        <div class="receipt-row receipt-total">
+                            <span>Total Paid:</span>
+                            <span id="receiptTotal">₹0.00</span>
+                        </div>
+                        <div
+                            class="text-center mt-4"
+                            style="font-size: 0.75rem; color: var(--text-muted)"
+                        >
+                            Thank you for visiting!<br />
+                            Drive safely.
+                        </div>
+                    </div>
+                    <div class="btn-group">
+                        <button
+                            class="btn btn-primary"
+                            style="width: 100%"
+                            onclick="window.print()"
+                        >
+                            <i class="fa-solid fa-print"></i> Print
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
 
-    <script>
-        // Three.js 3D Scene Setup
-        let scene, camera, renderer, particles = [];
-
-        function init() {
-            // Create scene
-            scene = new THREE.Scene();
-            scene.fog = new THREE.Fog(0x000000, 1, 1000);
-
-            // Create camera
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
-            camera.position.set(0, 0, 400);
-
-            // Create renderer
-            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setClearColor(0x000000, 0.8);
-            document.getElementById('canvas-container').appendChild(renderer.domElement);
-
-            // Create particles
-            createParticles();
-            
-            // Create 3D objects
-            create3DObjects();
-
-            // Event listeners
-            window.addEventListener('resize', onWindowResize, false);
-
-            animate();
-        }
-
-        function createParticles() {
-            const geometry = new THREE.BufferGeometry();
-            const vertices = [];
-            const colors = [];
-
-            for (let i = 0; i < 500; i++) {
-                vertices.push(
-                    Math.random() * 2000 - 1000,
-                    Math.random() * 2000 - 1000,
-                    Math.random() * 2000 - 1000
-                );
-
-                // Realistic gas station colors - green, white, yellow
-                const colorChoice = Math.random();
-                if (colorChoice < 0.6) {
-                    // Green (primary brand color)
-                    colors.push(0.13, 0.77, 0.37);
-                } else if (colorChoice < 0.8) {
-                    // White/light gray
-                    colors.push(0.9, 0.9, 0.95);
-                } else {
-                    // Yellow (warning/accent)
-                    colors.push(1.0, 0.84, 0.0);
-                }
-            }
-
-            geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-            geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-
-            const material = new THREE.PointsMaterial({
-                size: 2,
-                vertexColors: true,
-                transparent: true,
-                opacity: 0.6
-            });
-
-            const points = new THREE.Points(geometry, material);
-            scene.add(points);
-        }
-
-        function create3DObjects() {
-            // Create realistic gas pump models
-            for (let i = 0; i < 3; i++) {
-                // Create pump group
-                const pumpGroup = new THREE.Group();
-                
-                // Pump base (main body)
-                const pumpBaseGeometry = new THREE.BoxGeometry(25, 60, 20);
-                const pumpBaseMaterial = new THREE.MeshPhongMaterial({ 
-                    color: 0x22c55e,
-                    transparent: true, 
-                    opacity: 0.4,
-                    wireframe: false
-                });
-                const pumpBase = new THREE.Mesh(pumpBaseGeometry, pumpBaseMaterial);
-                
-                // Pump display screen
-                const screenGeometry = new THREE.BoxGeometry(20, 15, 2);
-                const screenMaterial = new THREE.MeshPhongMaterial({ 
-                    color: 0x1a1a1a,
-                    transparent: true,
-                    opacity: 0.8
-                });
-                const screen = new THREE.Mesh(screenGeometry, screenMaterial);
-                screen.position.set(0, 10, 11);
-                
-                // Pump nozzle holder
-                const holderGeometry = new THREE.CylinderGeometry(3, 3, 15, 8);
-                const holderMaterial = new THREE.MeshPhongMaterial({ 
-                    color: 0xffd700,
-                    transparent: true,
-                    opacity: 0.6
-                });
-                const holder = new THREE.Mesh(holderGeometry, holderMaterial);
-                holder.position.set(15, 0, 0);
-                holder.rotation.z = Math.PI / 2;
-                
-                // Add components to group
-                pumpGroup.add(pumpBase);
-                pumpGroup.add(screen);
-                pumpGroup.add(holder);
-                
-                // Position the pump group
-                pumpGroup.position.x = (Math.random() - 0.5) * 1000;
-                pumpGroup.position.y = (Math.random() - 0.5) * 300;
-                pumpGroup.position.z = (Math.random() - 0.5) * 600;
-                
-                pumpGroup.rotation.x = Math.random() * 0.3;
-                pumpGroup.rotation.y = Math.random() * Math.PI * 2;
-                
-                scene.add(pumpGroup);
-                particles.push(pumpGroup);
-            }
-
-            // Add realistic lighting
-            const ambientLight = new THREE.AmbientLight(0x404040, 0.8);
-            scene.add(ambientLight);
-
-            const mainLight = new THREE.DirectionalLight(0x22c55e, 0.8);
-            mainLight.position.set(100, 100, 50);
-            scene.add(mainLight);
-            
-            const fillLight = new THREE.DirectionalLight(0xffffff, 0.3);
-            fillLight.position.set(-100, -100, -50);
-            scene.add(fillLight);
-        }
-
-        function onWindowResize() {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        }
-
-        function animate() {
-            requestAnimationFrame(animate);
-
-            const time = Date.now() * 0.0005;
-
-            // Rotate particles and objects
-            particles.forEach((particle, index) => {
-                particle.rotation.x += 0.005;
-                particle.rotation.y += 0.008;
-                particle.position.y += Math.sin(time + index) * 0.3;
-            });
-
-            // Smooth automatic camera movement
-            camera.position.x = Math.sin(time * 0.3) * 50;
-            camera.position.y = Math.cos(time * 0.2) * 30;
-            camera.lookAt(scene.position);
-
-            renderer.render(scene, camera);
-        }
-
-        // Loading screen functionality
-        function hideLoadingScreen() {
-            const loadingScreen = document.getElementById('loading-screen');
-            loadingScreen.classList.add('hidden');
-            
-            // Remove loading screen from DOM after transition
-            setTimeout(() => {
-                loadingScreen.style.display = 'none';
-            }, 800);
-        }
-
-        // Initialize when page loads
-        window.addEventListener('load', () => {
-            // Show loading screen for minimum 2 seconds for better UX
-            setTimeout(() => {
-                hideLoadingScreen();
-                init(); // Initialize 3D scene after loading
-            }, 2000);
-        });
-    </script>
-</body>
+        <script src="script.js"></script>
+    </body>
 </html>
-

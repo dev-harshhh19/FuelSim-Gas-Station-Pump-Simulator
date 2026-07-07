@@ -1,513 +1,334 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // Constants
-    const UPDATE_INTERVAL = 100; // ms
-    const PRICE_UPDATE_INTERVAL = 300000; // 5 min
-    const COUNTING_SPEED = 12; // ₹12 per second
+/**
+ * FuelSim - Professional Gas Station Simulator
+ * Modular Architecture
+ */
 
-    // Elements
-    const petrolBtn = document.getElementById('petrolBtn');
-    const dieselBtn = document.getElementById('dieselBtn');
-    const xfuelBtn = document.getElementById('xfuelBtn');
-    const calcModeSelect = document.getElementById('calcModeSelect');
-    const amountInput = document.getElementById('amountInput');
-    const startBtn = document.getElementById('startBtn');
-    const stopBtn = document.getElementById('stopBtn');
-    const resetBtn = document.getElementById('resetBtn');
-    const printBillBtn = document.getElementById('printBillBtn');
-    const summaryFuel = document.getElementById('summaryFuel');
-    const summaryQuantity = document.getElementById('summaryQuantity');
-    const summaryPrice = document.getElementById('summaryPrice');
-    const summaryTotal = document.getElementById('summaryTotal');
-    const clickSound = document.getElementById('clickSound');
-    const pumpSound = document.getElementById('pumpSound');
-    const completeSound = document.getElementById('completeSound');
-    const fuelBtns = [petrolBtn, dieselBtn, xfuelBtn];
-    const body = document.body;
+const FuelSim = (() => {
+  // --- Configuration ---
+  const CONFIG = {
+    PUMP_UPDATE_INTERVAL_MS: 50,
+    FLOW_RATE_LITERS_PER_SEC: 1.5,
+    PRICES: {
+      petrol: 111.20,
+      diesel: 97.83,
+      xfuel: 120.40
+    },
+    IDLE_TIMEOUT_MS: 120000,
+    PRICE_UPDATE_INTERVAL_MS: 10000
+  };
 
-    // State
-    let selectedFuel = 'petrol';
-    let calculationType = calcModeSelect.value;
-    let currentPrices = { petrol: 106.20, diesel: 93.10, xfuel: 120.00 };
-    let targetAmount = 0;
-    let currentAmount = 0;
-    let isPumping = false;
-    let updateInterval;
+  // --- Application State ---
+  const state = {
+    selectedFuel: 'petrol',
+    calcMode: 'liters', // 'liters' or 'price'
+    targetAmount: 0,
+    dispensedVolume: 0,
+    totalCost: 0,
+    isPumping: false,
+    intervalId: null,
+    idleTimerId: null
+  };
 
-    // --- UI Update Functions ---
-    function updateSummary() {
-        summaryFuel.textContent = selectedFuel.charAt(0).toUpperCase() + selectedFuel.slice(1);
-        summaryPrice.textContent = `₹${currentPrices[selectedFuel].toFixed(2)}`;
-        if (calculationType === 'liters') {
-            summaryQuantity.textContent = `${currentAmount.toFixed(2)} L`;
-            summaryTotal.textContent = `₹${(currentAmount * currentPrices[selectedFuel]).toFixed(2)}`;
-        } else {
-            summaryQuantity.textContent = `${(currentAmount / currentPrices[selectedFuel]).toFixed(2)} L`;
-            summaryTotal.textContent = `₹${currentAmount.toFixed(2)}`;
-        }
-    }
-
-    function resetSummary() {
-        currentAmount = 0;
-        updateSummary();
-    }
-
-    function updateAmountPlaceholder() {
-        amountInput.placeholder = calculationType === 'liters' ? 'Enter liters' : 'Enter price';
-    }
-
-    function updateTheme() {
-        body.classList.remove('theme-petrol', 'theme-diesel', 'theme-xfuel');
-        if (selectedFuel === 'petrol') body.classList.add('theme-petrol');
-        else if (selectedFuel === 'diesel') body.classList.add('theme-diesel');
-        else if (selectedFuel === 'xfuel') body.classList.add('theme-xfuel');
-    }
-
-    // --- Event Handlers ---
-    petrolBtn.addEventListener('click', () => selectFuel('petrol'));
-    dieselBtn.addEventListener('click', () => selectFuel('diesel'));
-    xfuelBtn.addEventListener('click', () => selectFuel('xfuel'));
-
-    function selectFuel(fuel) {
-        selectedFuel = fuel;
-        fuelBtns.forEach(btn => btn.classList.remove('active'));
-        if (fuel === 'petrol') petrolBtn.classList.add('active');
-        if (fuel === 'diesel') dieselBtn.classList.add('active');
-        if (fuel === 'xfuel') xfuelBtn.classList.add('active');
-        playClick();
-        updateTheme();
-        resetSummary();
-    }
-
-    calcModeSelect.addEventListener('change', () => {
-        calculationType = calcModeSelect.value;
-        playClick();
-        updateAmountPlaceholder();
-        resetSummary();
-    });
-    amountInput.addEventListener('input', () => {
-        playClick();
-        resetSummary();
-    });
-
-    startBtn.addEventListener('click', () => {
-        if (isPumping) return;
-        const amount = parseFloat(amountInput.value);
-        if (isNaN(amount) || amount <= 0) {
-            amountInput.classList.add('ring-2', 'ring-red-400');
-            setTimeout(() => amountInput.classList.remove('ring-2', 'ring-red-400'), 1000);
-            return;
-        }
-        targetAmount = amount;
-        isPumping = true;
-        startBtn.disabled = true;
-        stopBtn.disabled = false;
-        amountInput.disabled = true;
-        pumpSound.currentTime = 0;
-        pumpSound.play();
-        updateInterval = setInterval(updatePump, UPDATE_INTERVAL);
-    });
-
-    stopBtn.addEventListener('click', () => {
-        if (!isPumping) return;
-        isPumping = false;
-        startBtn.disabled = false;
-        stopBtn.disabled = true;
-        amountInput.disabled = false;
-        pumpSound.pause();
-        completeSound.play();
-        clearInterval(updateInterval);
-    });
-
-    resetBtn.addEventListener('click', () => {
-        isPumping = false;
-        startBtn.disabled = false;
-        stopBtn.disabled = true;
-        printBillBtn.disabled = true;
-        amountInput.disabled = false;
-        amountInput.value = '';
-        pumpSound.pause();
-        clearInterval(updateInterval);
-        resetSummary();
-    });
-
-    // --- Pump Logic ---
-    function updatePump() {
-        if (!isPumping) return;
-        let increment;
-        if (calculationType === 'liters') {
-            increment = COUNTING_SPEED / currentPrices[selectedFuel] * (UPDATE_INTERVAL / 1000);
-            currentAmount = Math.min(currentAmount + increment, targetAmount);
-        } else {
-            increment = COUNTING_SPEED * (UPDATE_INTERVAL / 1000);
-            currentAmount = Math.min(currentAmount + increment, targetAmount);
-        }
-        updateSummary();
-        if (currentAmount >= targetAmount) {
-            isPumping = false;
-            startBtn.disabled = false;
-            stopBtn.disabled = true;
-            amountInput.disabled = false;
-            pumpSound.pause();
-            completeSound.play();
-            clearInterval(updateInterval);
-
-            // Enable Print Bill button when transaction is complete
-            printBillBtn.disabled = false;
-        }
-    }
-
-    // Print Bill Logic
-    function handlePrintBill() {
-        const billDetails = `
-            <div class="space-y-4">
-                <div class="text-center border-b border-green-700 pb-4 mb-4">
-                    <h3 class="text-lg font-bold text-green-300">FuelSim Gas Station</h3>
-                    <p class="text-sm text-gray-300">Fuel Receipt</p>
-                    <p class="text-xs text-gray-400">${new Date().toLocaleString()}</p>
-                </div>
-                <div class="space-y-2">
-                    <div class="flex justify-between">
-                        <span class="text-green-200">Fuel Type:</span>
-                        <span class="font-semibold">${summaryFuel.textContent}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-green-200">Quantity:</span>
-                        <span class="font-semibold">${summaryQuantity.textContent}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-green-200">Price per Unit:</span>
-                        <span class="font-semibold">${summaryPrice.textContent}</span>
-                    </div>
-                    <div class="border-t border-green-700 pt-2 mt-2">
-                        <div class="flex justify-between text-lg">
-                            <span class="text-green-300 font-bold">Total Cost:</span>
-                            <span class="font-bold text-green-400">${summaryTotal.textContent}</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="text-center text-xs text-gray-400 mt-4 border-t border-green-700 pt-2">
-                    <p>Thank you for using FuelSim!</p>
-                    <p>This is a simulated receipt.</p>
-                </div>
-            </div>
-        `;
-        
-        document.getElementById('billDetails').innerHTML = billDetails;
-        printBillModal.classList.remove('hidden');
-    }
-
-    printBillBtn.addEventListener('click', handlePrintBill);
-
-    // --- Price Update Simulation ---
-    function updateFuelPrices() {
-        // Simulate price change
-        const change = (Math.random() - 0.5) * 0.5;
-        currentPrices.petrol = Math.max(90, Math.min(120, currentPrices.petrol + change));
-        currentPrices.diesel = Math.max(80, Math.min(110, currentPrices.diesel + change));
-        currentPrices.xfuel = Math.max(100, Math.min(130, currentPrices.xfuel + change));
-        updateSummary();
-    }
-    setInterval(updateFuelPrices, PRICE_UPDATE_INTERVAL);
-
-    // --- Sound ---
-    function playClick() {
-        clickSound.currentTime = 0;
-        clickSound.play();
-    }
-
-    // --- Init ---
-    resetSummary();
-    stopBtn.disabled = true;
-    // Set default active
-    selectFuel('petrol');
-    updateAmountPlaceholder();
-    updateTheme();
-
-    // --- Feedback & Bug Reporting System ---
+  // --- DOM Elements ---
+  const elements = {
+    body: document.body,
     
-    // Feedback Form Handler
-    const feedbackForm = document.getElementById('feedbackForm');
-    if (feedbackForm) {
-        feedbackForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            handleFeedbackSubmission();
-        });
+    // Inputs
+    fuelBtns: document.querySelectorAll('.fuel-btn'),
+    calcMode: document.getElementById('calcMode'),
+    amountInput: document.getElementById('amountInput'),
+    
+    // Action Buttons
+    startBtn: document.getElementById('startBtn'),
+    stopBtn: document.getElementById('stopBtn'),
+    resetBtn: document.getElementById('resetBtn'),
+    printBtn: document.getElementById('printBtn'),
+    copyCryptoBtn: document.getElementById('copyCryptoBtn'),
+    
+    // Displays
+    displayFuel: document.getElementById('displayFuel'),
+    displayPrice: document.getElementById('displayPrice'),
+    displayVolume: document.getElementById('displayVolume'),
+    displayTotal: document.getElementById('displayTotal'),
+    
+    // Modal
+    receiptModal: document.getElementById('receiptModal'),
+    closeReceiptBtn: document.getElementById('closeReceiptBtn'),
+    
+    // Receipt fields
+    receiptDate: document.getElementById('receiptDate'),
+    receiptFuel: document.getElementById('receiptFuel'),
+    receiptUnitPrice: document.getElementById('receiptUnitPrice'),
+    receiptVolume: document.getElementById('receiptVolume'),
+    receiptTotal: document.getElementById('receiptTotal'),
+  };
+
+  // --- Formatting Utilities ---
+  const formatters = {
+    currency: (value) => `₹${value.toFixed(2)}`,
+    volume: (value) => `${value.toFixed(2)} L`,
+    capitalize: (str) => str.charAt(0).toUpperCase() + str.slice(1)
+  };
+
+  // --- Core Logic ---
+  
+  const getPrice = () => CONFIG.PRICES[state.selectedFuel];
+
+  const updateDisplays = () => {
+    elements.displayFuel.textContent = formatters.capitalize(state.selectedFuel);
+    elements.displayPrice.textContent = formatters.currency(getPrice());
+    elements.displayVolume.textContent = formatters.volume(state.dispensedVolume);
+    elements.displayTotal.textContent = formatters.currency(state.totalCost);
+  };
+
+  const setFuelType = (type) => {
+    if (state.isPumping) return;
+    
+    // Auto reset if switching fuels and we have dispensed or targeted amount
+    if (state.selectedFuel !== type && (state.dispensedVolume > 0 || state.targetAmount > 0)) {
+      resetPump();
     }
-
-    // Bug Report Form Handler
-    const bugReportForm = document.getElementById('bugReportForm');
-    if (bugReportForm) {
-        bugReportForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            handleBugReportSubmission();
-        });
-    }
-
-    function handleFeedbackSubmission() {
-        const name = document.getElementById('feedbackName').value.trim();
-        const email = document.getElementById('feedbackEmail').value.trim();
-        const type = document.getElementById('feedbackType').value;
-        const message = document.getElementById('feedbackMessage').value.trim();
-
-        if (!message) {
-            showStatus('Please enter a message', 'error');
-            return;
-        }
-
-        // Simulate sending feedback (in real app, this would send to server)
-        const feedbackData = {
-            name: name || 'Anonymous',
-            email: email || 'No email provided',
-            type: type,
-            message: message,
-            timestamp: new Date().toISOString(),
-            userAgent: navigator.userAgent,
-            currentFuel: selectedFuel,
-            currentMode: calculationType
-        };
-
-        console.log('Feedback submitted:', feedbackData);
-        
-        // Show success message
-        showStatus('Thank you for your feedback! We appreciate your input.', 'success');
-        
-        // Reset form
-        feedbackForm.reset();
-        
-        // Play success sound
-        playClick();
-    }
-
-    function handleBugReportSubmission() {
-        const title = document.getElementById('bugTitle').value.trim();
-        const severity = document.getElementById('bugSeverity').value;
-        const steps = document.getElementById('bugSteps').value.trim();
-        const details = document.getElementById('bugDetails').value.trim();
-
-        if (!title || !steps) {
-            showStatus('Please fill in the bug title and steps to reproduce', 'error');
-            return;
-        }
-
-        // Simulate sending bug report (in real app, this would send to server)
-        const bugData = {
-            title: title,
-            severity: severity,
-            steps: steps,
-            details: details || 'No additional details provided',
-            timestamp: new Date().toISOString(),
-            userAgent: navigator.userAgent,
-            currentFuel: selectedFuel,
-            currentMode: calculationType,
-            url: window.location.href
-        };
-
-        console.log('Bug report submitted:', bugData);
-        
-        // Show success message
-        showStatus('Bug report submitted successfully! We\'ll investigate this issue.', 'success');
-        
-        // Reset form
-        bugReportForm.reset();
-        
-        // Play success sound
-        playClick();
-    }
-
-    function submitQuickFeedback(type) {
-        const feedbackMessages = {
-            'love': 'We\'re thrilled you love FuelSim! ❤️',
-            'good': 'Great to hear you find it good! 👍',
-            'okay': 'Thanks for the feedback! We\'ll keep improving.',
-            'improve': 'Thanks for letting us know! We\'re always working to improve.'
-        };
-
-        const quickFeedbackData = {
-            type: type,
-            timestamp: new Date().toISOString(),
-            userAgent: navigator.userAgent,
-            currentFuel: selectedFuel,
-            currentMode: calculationType
-        };
-
-        console.log('Quick feedback submitted:', quickFeedbackData);
-        
-        // Show feedback message
-        showStatus(feedbackMessages[type], 'success');
-        
-        // Play click sound
-        playClick();
-    }
-
-    function showStatus(message, type = 'success') {
-        const statusDiv = document.getElementById('feedbackStatus');
-        const statusMessage = document.getElementById('statusMessage');
-        
-        if (statusDiv && statusMessage) {
-            statusMessage.textContent = message;
-            
-            // Update styling based on type
-            statusDiv.className = type === 'error' 
-                ? 'bg-red-600 text-white p-4 rounded-lg mb-4 text-center' 
-                : 'bg-green-600 text-white p-4 rounded-lg mb-4 text-center';
-            
-            // Show status
-            statusDiv.classList.remove('hidden');
-            
-            // Auto-hide after 5 seconds
-            setTimeout(() => {
-                statusDiv.classList.add('hidden');
-            }, 5000);
-        }
-    }
-
-    // Add smooth scrolling for feedback section
-    const feedbackLink = document.querySelector('a[href="#feedback"]');
-    if (feedbackLink) {
-        feedbackLink.addEventListener('click', function(e) {
-            e.preventDefault();
-            document.getElementById('feedback').scrollIntoView({behavior: 'smooth'});
-        });
-    }
-
-    // --- Minimalistic Floating Feedback Button Logic ---
-    const feedbackToggleBtn = document.getElementById('feedbackToggleBtn');
-    const feedbackPanel = document.getElementById('feedbackPanel');
-    const closeFeedbackPanel = document.getElementById('closeFeedbackPanel');
-    const miniFeedbackForm = document.getElementById('miniFeedbackForm');
-    const miniFeedbackMsg = document.getElementById('miniFeedbackMsg');
-    const miniFeedbackStatus = document.getElementById('miniFeedbackStatus');
-    const cancelMiniFeedback = document.getElementById('cancelMiniFeedback');
-
-    if (feedbackToggleBtn && feedbackPanel) {
-        feedbackToggleBtn.addEventListener('click', () => {
-            feedbackPanel.classList.toggle('hidden');
-            miniFeedbackStatus.classList.add('hidden');
-            miniFeedbackForm.reset();
-        });
-    }
-    if (closeFeedbackPanel) {
-        closeFeedbackPanel.addEventListener('click', () => {
-            feedbackPanel.classList.add('hidden');
-        });
-    }
-    if (cancelMiniFeedback) {
-        cancelMiniFeedback.addEventListener('click', () => {
-            feedbackPanel.classList.add('hidden');
-        });
-    }
-    if (miniFeedbackForm) {
-        miniFeedbackForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const msg = miniFeedbackMsg.value.trim();
-            if (!msg) {
-                miniFeedbackStatus.textContent = 'Please enter your feedback or bug report.';
-                miniFeedbackStatus.className = 'mt-2 text-center text-red-400 font-semibold';
-                miniFeedbackStatus.classList.remove('hidden');
-                return;
-            }
-            // Simulate sending feedback (could be replaced with backend call)
-            miniFeedbackStatus.textContent = 'Thank you for your feedback!';
-            miniFeedbackStatus.className = 'mt-2 text-center text-green-400 font-semibold';
-            miniFeedbackStatus.classList.remove('hidden');
-            miniFeedbackForm.reset();
-            setTimeout(() => {
-                feedbackPanel.classList.add('hidden');
-                miniFeedbackStatus.classList.add('hidden');
-            }, 2000);
-        });
-    }
-
-    // --- Print Bill Modal Logic ---
-    const printBillModal = document.getElementById('printBillModal');
-    const closePrintBill = document.getElementById('closePrintBill');
-    const printReceiptBtn = document.getElementById('printReceiptBtn');
-    const closeReceiptBtn = document.getElementById('closeReceiptBtn');
-
-    if (printReceiptBtn) {
-        printReceiptBtn.addEventListener('click', () => {
-            window.print(); // This will print the current page as it is rendered.
-        });
-    }
-    if (closeReceiptBtn) {
-        closeReceiptBtn.addEventListener('click', () => {
-            printBillModal.classList.add('hidden');
-        });
-    }
-
-    if (closePrintBill && printBillModal) {
-        closePrintBill.addEventListener('click', () => {
-            printBillModal.classList.add('hidden');
-        });
-    }
-    // Close modal on background click
-    if (printBillModal) {
-        printBillModal.addEventListener('click', (e) => {
-            if (e.target === printBillModal) {
-                printBillModal.classList.add('hidden');
-            }
-        });
-    }
-
-    // --- Quick Guide Modal Logic ---
-    const quickGuideBtn = document.getElementById('quickGuideBtn');
-    const quickGuideBtnMobile = document.getElementById('quickGuideBtnMobile');
-    const quickGuideModal = document.getElementById('quickGuideModal');
-    const closeQuickGuide = document.getElementById('closeQuickGuide');
-    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-    const mobileMenu = document.getElementById('mobileMenu');
-
-    if (mobileMenuBtn && mobileMenu) {
-        mobileMenuBtn.addEventListener('click', () => {
-            mobileMenu.classList.toggle('hidden');
-        });
-    }
-
-    window.closeMobileMenu = function() {
-        if (mobileMenu && !mobileMenu.classList.contains('hidden')) {
-            mobileMenu.classList.add('hidden');
-        }
-    }
-
-    if (quickGuideBtn && quickGuideModal) {
-        quickGuideBtn.addEventListener('click', () => {
-            quickGuideModal.classList.remove('hidden');
-        });
-    }
-    if (quickGuideBtnMobile && quickGuideModal) {
-        quickGuideBtnMobile.addEventListener('click', () => {
-            quickGuideModal.classList.remove('hidden');
-        });
-    }
-    if (closeQuickGuide && quickGuideModal) {
-        closeQuickGuide.addEventListener('click', () => {
-            quickGuideModal.classList.add('hidden');
-        });
-    }
-    // Close modal on background click
-    if (quickGuideModal) {
-        quickGuideModal.addEventListener('click', (e) => {
-            if (e.target === quickGuideModal) {
-                quickGuideModal.classList.add('hidden');
-            }
-        });
-    }
-    // Close modal on Escape key
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            if (printBillModal && !printBillModal.classList.contains('hidden')) {
-                printBillModal.classList.add('hidden');
-            } else if (quickGuideModal && !quickGuideModal.classList.contains('hidden')) {
-                quickGuideModal.classList.add('hidden');
-            }
-        }
+    
+    state.selectedFuel = type;
+    elements.body.setAttribute('data-fuel', type);
+    
+    elements.fuelBtns.forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.type === type);
     });
     
-    const lenis = new Lenis();
-    function raf(time) {
-        lenis.raf(time);
-        requestAnimationFrame(raf);
+    recalculateDerivedState();
+    updateDisplays();
+  };
+
+  const setCalcMode = (mode) => {
+    if (state.isPumping) return;
+    
+    state.calcMode = mode;
+    
+    if (mode === 'liters') {
+      elements.amountInput.placeholder = "Enter target volume (L)";
+      elements.amountInput.step = "0.01";
+    } else {
+      elements.amountInput.placeholder = "Enter target price (₹)";
+      elements.amountInput.step = "1";
+    }
+  };
+
+  const recalculateDerivedState = () => {
+    // If not pumping, ensure volume and cost match
+    if (!state.isPumping) {
+      if (state.dispensedVolume > 0) {
+        state.totalCost = state.dispensedVolume * getPrice();
+      }
+    }
+  };
+
+  const resetPump = () => {
+    if (state.isPumping) stopPump();
+    
+    state.targetAmount = 0;
+    state.dispensedVolume = 0;
+    state.totalCost = 0;
+    elements.amountInput.value = '';
+    
+    elements.amountInput.disabled = false;
+    elements.calcMode.disabled = false;
+    
+    elements.startBtn.disabled = false;
+    elements.stopBtn.disabled = true;
+    elements.printBtn.disabled = true;
+    
+    updateDisplays();
+  };
+
+  const startPump = () => {
+    if (state.isPumping) return;
+    
+    const inputValue = parseFloat(elements.amountInput.value);
+    
+    if (isNaN(inputValue) || inputValue <= 0) {
+      elements.amountInput.focus();
+      // Brief error indication
+      elements.amountInput.style.borderColor = 'var(--color-error)';
+      setTimeout(() => elements.amountInput.style.borderColor = '', 1000);
+      return;
+    }
+    
+    state.targetAmount = inputValue;
+    state.isPumping = true;
+    
+    // Lock inputs
+    elements.amountInput.disabled = true;
+    elements.calcMode.disabled = true;
+    
+    // Toggle buttons
+    elements.startBtn.disabled = true;
+    elements.stopBtn.disabled = false;
+    elements.printBtn.disabled = true;
+    
+    // Start interval
+    const updateStep = CONFIG.PUMP_UPDATE_INTERVAL_MS / 1000; // seconds
+    const volumeIncrement = CONFIG.FLOW_RATE_LITERS_PER_SEC * updateStep;
+    
+    state.intervalId = setInterval(() => {
+      pumpTick(volumeIncrement);
+    }, CONFIG.PUMP_UPDATE_INTERVAL_MS);
+  };
+
+  const stopPump = () => {
+    if (!state.isPumping) return;
+    
+    clearInterval(state.intervalId);
+    state.isPumping = false;
+    
+    elements.startBtn.disabled = false;
+    elements.stopBtn.disabled = true;
+    elements.printBtn.disabled = false; // Transaction complete, can print
+  };
+
+  const pumpTick = (volumeIncrement) => {
+    const currentPrice = getPrice();
+    let isComplete = false;
+    
+    if (state.calcMode === 'liters') {
+      state.dispensedVolume += volumeIncrement;
+      state.totalCost = state.dispensedVolume * currentPrice;
+      
+      if (state.dispensedVolume >= state.targetAmount) {
+        state.dispensedVolume = state.targetAmount;
+        state.totalCost = state.dispensedVolume * currentPrice;
+        isComplete = true;
+      }
+    } else {
+      // mode === 'price'
+      const priceIncrement = volumeIncrement * currentPrice;
+      state.totalCost += priceIncrement;
+      state.dispensedVolume = state.totalCost / currentPrice;
+      
+      if (state.totalCost >= state.targetAmount) {
+        state.totalCost = state.targetAmount;
+        state.dispensedVolume = state.totalCost / currentPrice;
+        isComplete = true;
+      }
+    }
+    
+    updateDisplays();
+    
+    if (isComplete) {
+      stopPump();
+    }
+  };
+
+  // --- Receipt Modal ---
+  const showReceipt = () => {
+    if (state.dispensedVolume === 0) return;
+    
+    elements.receiptDate.textContent = new Date().toLocaleString();
+    elements.receiptFuel.textContent = formatters.capitalize(state.selectedFuel);
+    elements.receiptUnitPrice.textContent = `${formatters.currency(getPrice())}/L`;
+    elements.receiptVolume.textContent = formatters.volume(state.dispensedVolume);
+    elements.receiptTotal.textContent = formatters.currency(state.totalCost);
+    
+    elements.receiptModal.classList.add('active');
+  };
+
+  const hideReceipt = () => {
+    elements.receiptModal.classList.remove('active');
+  };
+
+  // --- Copy Crypto ---
+  const copyCryptoAddress = async () => {
+    const address = "0xCd47D300a28E18443D19759D9957c347B86C2E27";
+    try {
+      await navigator.clipboard.writeText(address);
+      const span = elements.copyCryptoBtn.querySelector('span:last-child');
+      const originalText = span.textContent;
+      span.textContent = "(Copied!)";
+      span.style.color = "var(--color-success)";
+      
+      setTimeout(() => {
+        span.textContent = originalText;
+        span.style.color = "";
+      }, 2000);
+    } catch (err) {
+      console.error('Failed to copy', err);
+    }
+  };
+
+  // --- Background Tasks (Idle Timer & Live Prices) ---
+  const resetIdleTimer = () => {
+    if (state.idleTimerId) clearTimeout(state.idleTimerId);
+    state.idleTimerId = setTimeout(() => {
+      // Auto reset meters after 120s of inactivity
+      if (state.dispensedVolume > 0 || state.targetAmount > 0) {
+        resetPump();
+        console.log("Pump auto-reset due to 120s inactivity.");
+      }
+    }, CONFIG.IDLE_TIMEOUT_MS);
+  };
+
+  const startLivePrices = () => {
+    setInterval(() => {
+      // Simulate real-time market fluctuations (+/- 0.05 to 0.15)
+      Object.keys(CONFIG.PRICES).forEach(fuel => {
+        const fluctuation = (Math.random() - 0.5) * 0.3;
+        CONFIG.PRICES[fuel] = Math.max(10, CONFIG.PRICES[fuel] + fluctuation);
+      });
+      // Only update UI if not currently pumping to avoid layout shifts/distractions
+      if (!state.isPumping) {
+        updateDisplays();
+      }
+    }, CONFIG.PRICE_UPDATE_INTERVAL_MS);
+  };
+
+
+  // --- Initialization & Event Binding ---
+  const init = () => {
+    // Bind Fuel Buttons
+    elements.fuelBtns.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        setFuelType(e.target.dataset.type);
+      });
+    });
+
+    // Bind Calc Mode
+    elements.calcMode.addEventListener('change', (e) => {
+      setCalcMode(e.target.value);
+    });
+
+    // Bind Actions
+    elements.startBtn.addEventListener('click', startPump);
+    elements.stopBtn.addEventListener('click', stopPump);
+    elements.resetBtn.addEventListener('click', resetPump);
+    elements.printBtn.addEventListener('click', showReceipt);
+    
+    // Bind Modal Close
+    elements.closeReceiptBtn.addEventListener('click', hideReceipt);
+    elements.receiptModal.addEventListener('click', (e) => {
+      if (e.target === elements.receiptModal) hideReceipt();
+    });
+
+    // Support / Copy
+    if (elements.copyCryptoBtn) {
+      elements.copyCryptoBtn.addEventListener('click', copyCryptoAddress);
     }
 
-    requestAnimationFrame(raf);
-}); 
+    // Activity bindings for idle timer
+    ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'].forEach(evt => {
+      document.addEventListener(evt, resetIdleTimer, { passive: true });
+    });
+
+    // Start background tasks
+    resetIdleTimer();
+    startLivePrices();
+
+    // Initial render
+    setCalcMode(state.calcMode);
+    updateDisplays();
+  };
+
+  return { init };
+})();
+
+// Initialize on DOM load
+document.addEventListener('DOMContentLoaded', FuelSim.init);

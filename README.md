@@ -4,7 +4,7 @@
   <img src="logo.png" alt="FuelSim Logo" width="100">
   <br>
   <br>
-  <p>A modern, interactive web-based gas station pump simulator featuring animated UI, glassmorphism effects, and real-time theming.</p>
+  <p>A professional, interactive web-based gas station pump simulator featuring a clean dashboard UI, modular architecture, and simulated real-time pricing.</p>
   
   [![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen?style=for-the-badge)](https://dev-harshhh19.github.io/FuelSim-Gas-Station-Pump-Simulator/)
   [![GitHub](https://img.shields.io/badge/GitHub-Repository-blue?style=for-the-badge)](https://github.com/dev-harshhh19/FuelSim-Gas-Station-Pump-Simulator)
@@ -14,15 +14,13 @@
 
 ## ✨ Features
 
-- 🎮 **Realistic Gas Pump Simulation**: Choose fuel type, calculation mode (liters/price), and simulate dispensing
-- 🎨 **Live Animated Gradients**: Dynamic, animated backgrounds and panels for a lively, modern look
-- 🪟 **Glassmorphism UI**: Liquid glass effect on main panels, cards, navbar, and feedback for a premium feel
-- 💬 **Minimalistic Feedback System**: Floating feedback/report bug button with expandable form and quick feedback options
-- 📘 **Quick Guide**: Built-in help modal for instant onboarding
-- 🌈 **Dynamic Theming**: Instantly switch between Petrol, Diesel, and Xfuel themes
-- 📱 **Fully Responsive Design**: Works beautifully on desktop, tablet, and mobile devices
-- 🎵 **Sound Effects**: Realistic pump sounds and UI interactions
-- 🧾 **Print Bill Feature**: Generate and print detailed fuel receipts
+- 🎮 **Realistic Gas Pump Simulation**: Choose fuel type, calculation mode (liters/price), and simulate dispensing.
+- 📈 **Simulated Live Pricing**: Fuel prices subtly fluctuate in real-time to mimic live market data feeds.
+- 🧠 **Modular JavaScript Architecture**: Built using clean IIFE patterns for robust state management and separated UI logic.
+- 🎨 **Vanilla CSS Design System**: Zero dependencies. Powered entirely by modern CSS Custom Properties (Variables) for lightweight, scalable theming.
+- 📱 **Fully Responsive Design**: A dashboard layout that works beautifully on desktop, tablet, and mobile devices.
+- 🧾 **Print Bill Feature**: Generate and print detailed transaction receipts.
+- ⏱️ **Auto-Reset functionality**: Idle timeout and fuel-switching automatically reset the pump to ensure a continuous fresh state.
 
 ---
 
@@ -35,10 +33,9 @@
    git clone https://github.com/dev-harshhh19/FuelSim-Gas-Station-Pump-Simulator.git
    cd FuelSim-Gas-Station-Pump-Simulator
    ```
-3. **Open `index.html`** in your browser for the landing page
-4. **Click "Enter Simulator"** to access the main application
+3. **Open `index.html`** in your browser.
 
-*No build step or server required!*
+*No build step, npm install, or server required! Pure HTML, CSS, and JS.*
 
 ---
 
@@ -46,10 +43,9 @@
 
 ```
 FuelSim-Gas-Station-Pump-Simulator/
-├── index.html          # Landing page
-├── simulator.html      # Main simulator application
-├── styles.css          # All styles, glassmorphism & dynamic themes
-├── script.js           # Interactive logic and functionality
+├── index.html          # Main simulator application
+├── styles.css          # Vanilla CSS Design System
+├── script.js           # Modular state and logic
 ├── logo.png            # Application logo
 ├── privacy.html        # Privacy policy page
 ├── terms.html          # Terms of service page
@@ -58,40 +54,18 @@ FuelSim-Gas-Station-Pump-Simulator/
 
 ---
 
-## 🎨 UI Highlights
-
-- **✨ Glassmorphism**: All major panels and cards use a frosted glass effect for a modern, premium look
-- **🌊 Animated Gradients**: Subtle, moving backgrounds bring the UI to life
-- **🎈 Floating Feedback Button**: Minimal, always-accessible feedback/report bug system
-- **❓ Quick Guide Modal**: Click the help icon in the navbar for instant instructions
-- **📱 Mobile-First**: Fully responsive design with mobile menu and touch-friendly controls
-- **🎯 Accessibility**: Keyboard navigation support and screen reader friendly
-
----
-
-## ⚙️ Customization
-
-- **🎨 Themes**: Change fuel type to see the UI color and style adapt instantly
-- **📝 Feedback**: All feedback is handled in-app; no backend required
-- **🪟 Glass Effect**: Tweak the `.glass` class in `styles.css` for more/less blur or transparency
-- **🎵 Sound**: Toggle sound effects on/off
-- **💰 Pricing**: Modify fuel prices in the JavaScript configuration
-
----
-
 ## 🛠️ Technologies Used
 
-- **Frontend**: HTML5, CSS3, JavaScript (ES6+)
-- **Styling**: Tailwind CSS, Custom CSS with Glassmorphism
+- **Frontend**: HTML5, Vanilla CSS3, JavaScript (ES6+)
 - **Icons**: Font Awesome 6.4.2
-- **Fonts**: Share Tech Mono, Digital-7
-- **Audio**: Web Audio API with Mixkit sounds
+- **Fonts**: Inter, JetBrains Mono (Google Fonts)
+- **Architecture**: No-build, Zero-dependency, Modular JS (IIFE)
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
+Contributions are welcome! Please feel free to submit a Pull Request. 
 
 1. Fork the Project
 2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
@@ -101,32 +75,22 @@ Contributions are welcome! Please feel free to submit a Pull Request. For major 
 
 ---
 
-## 🙏 Credits
-
-- **👨‍💻 Developer**: [Harshad Nikam](https://github.com/dev-harshhh19)
-- **🎨 Icons**: [Font Awesome](https://fontawesome.com/)
-- **🔤 Fonts**: [Share Tech Mono](https://fonts.google.com/specimen/Share+Tech+Mono), [Digital-7](https://www.dafont.com/digital-7.font)
-- **🎵 Sounds**: [Mixkit](https://mixkit.co/)
-- **🎨 Styling**: [Tailwind CSS](https://tailwindcss.com/)
-
----
-
 ## 📞 Contact & Support
 
-- **📧 Email**: [help.fuelsim.com](mailto:harshadnikam7516@gmail.com)
-- **🐙 GitHub**: [@dev-harshhh19](https://github.com/dev-harshhh19)
+- **👨‍💻 Developer**: [Harshad Nikam](https://github.com/dev-harshhh19)
+- **📧 Email**: [harshadnikam7516@gmail.com](mailto:harshadnikam7516@gmail.com)
 - **💼 LinkedIn**: [Harshad Nikam](https://in.linkedin.com/in/harshad-nikam-311734281)
 - **📱 Instagram**: [@dev.harshhh19](https://instagram.com/dev.harshhh19/)
 
 ---
 
-## 💝 Donate
+## 💝 Support the Developer
 
 If you find this project helpful, consider supporting development:
 
-- **₿ Bitcoin**: `1JcifknwxVZDbQafrqBVyVN32FBXhdPCHS`
-- **Ξ Ethereum**: `0xb797e1a085E39f15841083E6FBB0b4750ff1A173`
-- **💰 USDT (TRC20)**: `0xb797e1a085E39f15841083E6FBB0b4750ff1A173`
+- **☕ Buy Me A Coffee**: [https://buymeacoffee.com/dev.harshhh](https://buymeacoffee.com/dev.harshhh)
+- **🐙 GitHub Sponsors**: [https://github.com/sponsors/dev-harshhh19](https://github.com/sponsors/dev-harshhh19)
+- **💰 USDT (TRC20)**: `0xCd47D300a28E18443D19759D9957c347B86C2E27`
 
 ---
 
@@ -134,9 +98,6 @@ If you find this project helpful, consider supporting development:
 
 This project is for educational and demonstration purposes only. See [`terms.html`](terms.html) for details.
 
----
-
 <div align="center">
-  <p><strong>Enjoy fueling up with FuelSim! ⛽🚗</strong></p>
   <p>Made with ❤️ by <a href="https://github.com/dev-harshhh19">Harshad Nikam</a></p>
 </div>
