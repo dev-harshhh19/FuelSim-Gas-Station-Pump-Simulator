@@ -1,103 +1,66 @@
-# ⛽ FuelSim - Gas Station Pump Simulator
+# FuelSim
 
-<div align="center">
-  <img src="logo.png" alt="FuelSim Logo" width="100">
-  <br>
-  <br>
-  <p>A professional, interactive web-based gas station pump simulator featuring a clean dashboard UI, modular architecture, and simulated real-time pricing.</p>
-  
-  [![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen?style=for-the-badge)](https://dev-harshhh19.github.io/FuelSim-Gas-Station-Pump-Simulator/)
-  [![GitHub](https://img.shields.io/badge/GitHub-Repository-blue?style=for-the-badge)](https://github.com/dev-harshhh19/FuelSim-Gas-Station-Pump-Simulator)
-</div>
+A professional, interactive web-based simulation of a gas station pump interface. Built to demonstrate clean front-end architecture, strict separation of concerns, and scalable styling practices in a modern web environment.
 
----
+[![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen?style=for-the-badge)](https://dev-harshhh19.github.io/FuelSim-Gas-Station-Pump-Simulator/)
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-blue?style=for-the-badge)](https://github.com/dev-harshhh19/FuelSim-Gas-Station-Pump-Simulator)
 
-## ✨ Features
+## Architecture & Technical Overview
 
-- 🎮 **Realistic Gas Pump Simulation**: Choose fuel type, calculation mode (liters/price), and simulate dispensing.
-- 📈 **Simulated Live Pricing**: Fuel prices subtly fluctuate in real-time to mimic live market data feeds.
-- 🧠 **Modular JavaScript Architecture**: Built using clean IIFE patterns for robust state management and separated UI logic.
-- 🎨 **Vanilla CSS Design System**: Zero dependencies. Powered entirely by modern CSS Custom Properties (Variables) for lightweight, scalable theming.
-- 📱 **Fully Responsive Design**: A dashboard layout that works beautifully on desktop, tablet, and mobile devices.
-- 🧾 **Print Bill Feature**: Generate and print detailed transaction receipts.
-- ⏱️ **Auto-Reset functionality**: Idle timeout and fuel-switching automatically reset the pump to ensure a continuous fresh state.
+This project was intentionally engineered with zero dependencies (no build pipelines, no CSS frameworks, no external libraries) to highlight fundamental web development principles.
 
----
+- **Modular JavaScript (IIFE)**: State management, configuration, DOM caching, and event binding are strictly encapsulated within an Immediately Invoked Function Expression. UI updates are decoupled from core calculation logic.
+- **Vanilla CSS Custom Properties**: The design system relies entirely on CSS variables for consistent typography, spacing, semantic colors, and state changes. This ensures high maintainability and trivial theming.
+- **Semantic HTML5**: The markup uses structurally correct HTML elements (`<main>`, `<section>`, `<header>`, `<footer>`) to ensure accessibility and logical DOM hierarchy.
+- **Responsive Dashboard Layout**: Styled using CSS Grid and Flexbox for a robust, mobile-first interface that adapts cleanly to any viewport.
+- **Simulated Real-Time Data**: Implements asynchronous timeouts and intervals to mimic live market price fluctuations and inactivity timeouts (120s auto-reset).
 
-## 🚀 Getting Started
+## Project Structure
 
-### Quick Start
-1. **Visit the Live Demo**: [FuelSim Live](https://dev-harshhh19.github.io/FuelSim-Gas-Station-Pump-Simulator/)
-2. **Or Clone Locally**:
-   ```bash
-   git clone https://github.com/dev-harshhh19/FuelSim-Gas-Station-Pump-Simulator.git
-   cd FuelSim-Gas-Station-Pump-Simulator
-   ```
-3. **Open `index.html`** in your browser.
-
-*No build step, npm install, or server required! Pure HTML, CSS, and JS.*
-
----
-
-## 📁 Project Structure
-
-```
-FuelSim-Gas-Station-Pump-Simulator/
-├── index.html          # Main simulator application
-├── styles.css          # Vanilla CSS Design System
-├── script.js           # Modular state and logic
-├── logo.png            # Application logo
-├── privacy.html        # Privacy policy page
-├── terms.html          # Terms of service page
+```text
+FuelSim/
+├── index.html          # Core markup and structural layout
+├── styles.css          # CSS variable definitions and scoped component styling
+├── script.js           # Encapsulated application state and operational logic
+├── logo.png            # Application asset
+├── privacy.html        # Legal documentation
+├── terms.html          # Legal documentation
 └── README.md           # Project documentation
 ```
 
----
+## Getting Started
 
-## 🛠️ Technologies Used
+Because the project utilizes a zero-dependency architecture, execution is trivial.
 
-- **Frontend**: HTML5, Vanilla CSS3, JavaScript (ES6+)
-- **Icons**: Font Awesome 6.4.2
-- **Fonts**: Inter, JetBrains Mono (Google Fonts)
-- **Architecture**: No-build, Zero-dependency, Modular JS (IIFE)
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/dev-harshhh19/FuelSim-Gas-Station-Pump-Simulator.git
+   ```
+2. Navigate to the directory and open `index.html` in any modern web browser.
+3. No local server, package manager, or compilation step is required.
 
----
+## Core Functionality
 
-## 🤝 Contributing
+- **Volume vs. Price Calculation**: The engine dynamically supports cross-calculation depending on user preference (target liters vs. target currency).
+- **Idle State Management**: Continuous event listeners monitor for interaction; prolonged inactivity automatically purges local state to simulate real-world kiosk behavior.
+- **State-Dependent Resets**: Transitioning between fuel types actively resets the pump transaction state to prevent calculation overlaps.
+- **Receipt Generation**: Formats transaction state into a printable ledger component, triggering the native browser print dialogue.
 
-Contributions are welcome! Please feel free to submit a Pull Request. 
+## Developer
 
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+**Harshad Nikam**
+- Email: [harshadnikam7516@gmail.com](mailto:harshadnikam7516@gmail.com)
+- LinkedIn: [Harshad Nikam](https://in.linkedin.com/in/harshad-nikam-311734281)
+- GitHub: [@dev-harshhh19](https://github.com/dev-harshhh19)
 
----
+### Sponsorship
 
-## 📞 Contact & Support
+If you found this architecture demonstration useful, consider supporting future open-source efforts:
 
-- **👨‍💻 Developer**: [Harshad Nikam](https://github.com/dev-harshhh19)
-- **📧 Email**: [harshadnikam7516@gmail.com](mailto:harshadnikam7516@gmail.com)
-- **💼 LinkedIn**: [Harshad Nikam](https://in.linkedin.com/in/harshad-nikam-311734281)
-- **📱 Instagram**: [@dev.harshhh19](https://instagram.com/dev.harshhh19/)
+- [Buy Me A Coffee](https://buymeacoffee.com/dev.harshhh)
+- [GitHub Sponsors](https://github.com/sponsors/dev-harshhh19)
+- **USDT (TRC20)**: `0xCd47D300a28E18443D19759D9957c347B86C2E27`
 
----
+## License
 
-## 💝 Support the Developer
-
-If you find this project helpful, consider supporting development:
-
-- **☕ Buy Me A Coffee**: [https://buymeacoffee.com/dev.harshhh](https://buymeacoffee.com/dev.harshhh)
-- **🐙 GitHub Sponsors**: [https://github.com/sponsors/dev-harshhh19](https://github.com/sponsors/dev-harshhh19)
-- **💰 USDT (TRC20)**: `0xCd47D300a28E18443D19759D9957c347B86C2E27`
-
----
-
-## 📄 License
-
-This project is for educational and demonstration purposes only. See [`terms.html`](terms.html) for details.
-
-<div align="center">
-  <p>Made with ❤️ by <a href="https://github.com/dev-harshhh19">Harshad Nikam</a></p>
-</div>
+This software is provided for educational and demonstrative purposes. Review `terms.html` for specific usage constraints.
