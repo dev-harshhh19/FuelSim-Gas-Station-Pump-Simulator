@@ -15,19 +15,6 @@ This project was intentionally engineered with zero dependencies (no build pipel
 - **Responsive Dashboard Layout**: Styled using CSS Grid and Flexbox for a robust, mobile-first interface that adapts cleanly to any viewport.
 - **Simulated Real-Time Data**: Implements asynchronous timeouts and intervals to mimic live market price fluctuations and inactivity timeouts (120s auto-reset).
 
-## Project Structure
-
-```text
-FuelSim/
-├── index.html          # Core markup and structural layout
-├── styles.css          # CSS variable definitions and scoped component styling
-├── script.js           # Encapsulated application state and operational logic
-├── logo.png            # Application asset
-├── privacy.html        # Legal documentation
-├── terms.html          # Legal documentation
-└── README.md           # Project documentation
-```
-
 ## Getting Started
 
 Because the project utilizes a zero-dependency architecture, execution is trivial.
@@ -45,22 +32,3 @@ Because the project utilizes a zero-dependency architecture, execution is trivia
 - **Idle State Management**: Continuous event listeners monitor for interaction; prolonged inactivity automatically purges local state to simulate real-world kiosk behavior.
 - **State-Dependent Resets**: Transitioning between fuel types actively resets the pump transaction state to prevent calculation overlaps.
 - **Receipt Generation**: Formats transaction state into a printable ledger component, triggering the native browser print dialogue.
-
-## Developer
-
-**Harshad Nikam**
-- Email: [harshadnikam7516@gmail.com](mailto:harshadnikam7516@gmail.com)
-- LinkedIn: [Harshad Nikam](https://in.linkedin.com/in/harshad-nikam-311734281)
-- GitHub: [@dev-harshhh19](https://github.com/dev-harshhh19)
-
-### Sponsorship
-
-If you found this architecture demonstration useful, consider supporting future open-source efforts:
-
-- [Buy Me A Coffee](https://buymeacoffee.com/dev.harshhh)
-- [GitHub Sponsors](https://github.com/sponsors/dev-harshhh19)
-- **USDT (TRC20)**: `0xCd47D300a28E18443D19759D9957c347B86C2E27`
-
-## License
-
-This software is provided for educational and demonstrative purposes. Review `terms.html` for specific usage constraints.
